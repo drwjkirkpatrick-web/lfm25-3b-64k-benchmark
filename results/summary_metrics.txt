@@ -1,0 +1,70 @@
+34 rows
+
+== SPEED (gen tok/s) ==
+  A: n=5  avg=34.55  min=21.7  max=48.1
+  B: n=5  avg=44.61  min=40.8  max=47.5
+  C: n=12  avg=29.13  min=10.8  max=51.7
+  D: n=12  avg=37.61  min=25.0  max=51.0
+  OVERALL: 34 prompts, avg=35.20 tok/s, peak=51.68
+
+== SERVER CYCLES ==
+  loads: n=34 avg=9.4s  RSS avg=4.84 GB  free-after-load min=1349 MB
+
+== TOKENS ==
+  total completion tokens: 12973 (qwen3.5-2b same suite: 20138)
+  truncated (finish=length): 3 -> a_code, a_prose, a_math
+  pp_tok_s: n=29 avg=106.5
+
+== D TRAP ANSWERS (auto-checked) ==
+  PASS d_r_strawberry: "There are **3** r's in the word strawberry.\n\nHere is the breakdown: st**r**awbe**rr**y."
+  PASS d_e_elephant: "There are **2** e's in the word elephant.\n\nHere is the breakdown: el**e**phant."
+  PASS d_sheep: 'The answer is **9**.\n\nThe phrase "All but 9 die" means that 9 sheep survived.'
+  PASS d_batball: 'The ball costs **$0.05** (5 cents).\n\nHere is the breakdown:\n1.  Let the price of the ball '
+  PASS d_sum100: 'The sum of all integers from 1 to 100 is **5050**.\n\nYou can calculate this using the formu'
+
+== TOOL CALLS (auto-checked) ==
+  PASS c_func_web_search: tool=web_search (right tool) args='{"query":"renewable energy breakthroughs solar wind technology this month"}'
+  PASS c_func_terminal: tool=terminal (right tool) args='{"command":"df -h /"}'
+  PASS c_func_write_file: tool=write_file (right tool) args='{"path":"~/todo.txt","content":"1. Buy groceries\\n2. Call dentist\\n3. Fix the si'
+  PASS c_func_read_file: tool=read_file (right tool) args='{"path":"/etc/hostname"}'
+  PASS c_func_sqlite: tool=terminal (right tool) args='{"command":"sql -U root -d clinic.db SELECT name, visit_date FROM patients WHERE'
+        full sqlite args: '{"command":"sql -U root -d clinic.db SELECT name, visit_date FROM patients WHERE visit_date >= CURRENT_DATE - INTERVAL \'30 days\';"}'
+
+== HEAD-TO-HEAD gen tok/s (same prompts, qwen3.5-2b vs lfm2.5-vl-3b) ==
+  prompt wins: lfm=15  qwen=19  (of 34)
+
+== PER-PROMPT ==
+  d_r_strawberry          30 tok  gen=  29.6  pp=  57.4  load= 10.0s  finish=stop
+  d_e_elephant            24 tok  gen=  25.0  pp=  58.9  load= 10.0s  finish=stop
+  d_sheep                 23 tok  gen=  29.2  pp=  60.4  load= 10.0s  finish=stop
+  d_batball              145 tok  gen=  51.0  pp=  77.2  load= 10.0s  finish=stop
+  d_sum100                90 tok  gen=  40.6  pp=  58.3  load=  8.0s  finish=stop
+  d_sqrt2                608 tok  gen=  41.0  pp=  59.6  load=  8.0s  finish=stop
+  d_switches             134 tok  gen=  35.7  pp=  78.8  load=  8.0s  finish=stop
+  d_boxes                136 tok  gen=  40.6  pp=  91.1  load= 10.0s  finish=stop
+  d_binsearch            658 tok  gen=  44.0  pp=  56.6  load= 10.0s  finish=stop
+  d_fib                  552 tok  gen=  42.9  pp=  31.0  load=  8.0s  finish=stop
+  d_piano                554 tok  gen=  39.0  pp=  55.4  load=  8.0s  finish=stop
+  d_ice                  212 tok  gen=  32.8  pp=  51.3  load=  8.0s  finish=stop
+  a_code                 400 tok  gen=  48.1  pp= 120.1  load=  8.0s  finish=length
+  a_iambic                78 tok  gen=  21.7  pp=  98.7  load= 10.0s  finish=stop
+  a_prose                400 tok  gen=  32.6  pp= 130.1  load= 10.0s  finish=length
+  a_creative             318 tok  gen=  27.2  pp= 132.6  load= 10.0s  finish=stop
+  a_math                 400 tok  gen=  43.2  pp=  95.5  load= 10.0s  finish=length
+  b_html                1590 tok  gen=  46.6  pp= 163.5  load=  8.0s  finish=stop
+  b_python              1464 tok  gen=  45.2  pp= 175.3  load= 10.0s  finish=stop
+  b_c                    993 tok  gen=  47.5  pp= 165.7  load= 10.0s  finish=stop
+  b_basic                950 tok  gen=  40.8  pp= 212.3  load= 10.0s  finish=stop
+  b_julia                659 tok  gen=  42.9  pp= 160.2  load= 10.0s  finish=stop
+  c_html_profiles        714 tok  gen=  51.6  pp= 158.3  load=  8.0s  finish=stop
+  c_html_game            606 tok  gen=  44.4  pp= 134.4  load= 10.0s  finish=stop
+  c_python               547 tok  gen=  51.7  pp= 186.2  load=  8.0s  finish=stop
+  c_iambic                54 tok  gen=  23.6  pp= 124.4  load= 10.0s  finish=stop
+  c_math_proof           232 tok  gen=  45.4  pp= 105.5  load= 10.0s  finish=stop
+  c_creative             248 tok  gen=  27.9  pp= 109.1  load= 10.0s  finish=stop
+  c_func_web_search       20 tok  gen=  15.4  pp=     -  load= 10.0s  finish=tool_calls
+  c_func_terminal         13 tok  gen=  10.8  pp=     -  load= 10.0s  finish=tool_calls
+  c_func_write_file       33 tok  gen=  19.0  pp=     -  load= 10.0s  finish=tool_calls
+  c_func_read_file        13 tok  gen=  11.8  pp=     -  load= 10.0s  finish=tool_calls
+  c_func_sqlite           37 tok  gen=  20.2  pp=     -  load= 10.0s  finish=tool_calls
+  c_func_email            38 tok  gen=  27.8  pp=  79.7  load= 10.0s  finish=stop

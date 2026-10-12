@@ -1,0 +1,25 @@
+{
+ "id": "needle_48k",
+ "model": "lfm25-3b-64k",
+ "ctx": 65536,
+ "kv_quant": "f16",
+ "yarn": "rope-scale 2.0",
+ "n_ctx_train": 32768,
+ "server": {
+  "load_s": 8.0,
+  "rss_gb": 4.84,
+  "free_after_load_mb": 1577,
+  "kv_line": null,
+  "n_ctx_train": null
+ },
+ "needle": "PINECONE-42",
+ "grade": "FAIL",
+ "depth_prompt_tokens": 49340,
+ "answer": "PINECONE",
+ "ttft_s": 69.339,
+ "total_s": 69.78,
+ "pp_tok_s_at_depth": 711.6,
+ "gen_tok_s": 11.34,
+ "completion_tokens": 5,
+ "finish_reason": "stop"
+}

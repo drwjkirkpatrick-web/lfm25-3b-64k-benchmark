@@ -227,12 +227,13 @@ def stream_chat(prompt, tools=None, max_tokens=1024, timeout=300):
             "eff_tok_s": round(ct / total, 2) if (ct and total > 0) else None}
 
 
-def run_ids(targets, spec):
+def run_ids(targets, spec, max_tokens_override=None):
     os.makedirs(os.path.dirname(RESULTS), exist_ok=True)
     out_f = open(RESULTS, "a")
     for p in targets:
         pid_ = p["id"]
         log_path = f"/tmp/lfm64k_{pid_}.log"
+        mt = max_tokens_override or p["max_tokens"]
         print(f"\n=== {pid_} ({p['label']}) ===", flush=True)
         kill_server()
         proc, load_s, log_path = launch_server(log_path)
@@ -247,11 +248,11 @@ def run_ids(targets, spec):
               f"free {facts['free_after_load_mb']} MB", flush=True)
         tools = [TOOL_SCHEMAS[p["tool"]]] if p.get("tool") in TOOL_SCHEMAS else None
         try:
-            r = stream_chat(p["prompt"], tools=tools, max_tokens=p["max_tokens"])
+            r = stream_chat(p["prompt"], tools=tools, max_tokens=mt)
         except Exception as e:
             r = {"error": f"{type(e).__name__}: {e}"}
         rec = {"id": pid_, "suite": p["suite"], "category": p["category"],
-               "label": p["label"], "max_tokens": p["max_tokens"],
+               "label": p["label"], "max_tokens": mt,
                "expected_tool": p.get("expected_tool"),
                "server": {"load_s": load_s, "alias": ALIAS, "ctx": CTX,
                           "kv_quant": "f16", "yarn": "rope-scale 2.0",
@@ -285,11 +286,18 @@ def summarize():
 
 
 def main():
+    global RESULTS
     ap = argparse.ArgumentParser()
     ap.add_argument("--ids", help="comma-separated prompt ids")
     ap.add_argument("--suite", choices=["a", "b", "c", "d"])
     ap.add_argument("--list", action="store_true")
+    ap.add_argument("--max-tokens", type=int,
+                    help="override max_tokens for every selected prompt")
+    ap.add_argument("--results", default=RESULTS,
+                    help="results JSONL path (fresh file for capped-vs-uncapped comparisons)")
     args = ap.parse_args()
+
+    RESULTS = args.results
 
     spec = json.load(open(PROMPTS_FILE))
     prompts = spec["prompts"]
@@ -322,7 +330,7 @@ def main():
     if not targets:
         print("nothing to run")
         return
-    run_ids(targets, spec)
+    run_ids(targets, spec, args.max_tokens)
 
 
 if __name__ == "__main__":

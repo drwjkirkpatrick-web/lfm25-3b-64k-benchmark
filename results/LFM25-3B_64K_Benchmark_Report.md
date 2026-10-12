@@ -72,7 +72,45 @@ truncated; c_html_game 606 clean vs 2048 truncated).
 ## Open items
 
 - Full 1–10 rubric grading of all 34 responses (raw text saved in the JSONL) — not yet done
-- Suite A at 6000 max tokens (3 of 5 A-prompts hit the historical 400 cap —
-  same truncation artifact as Qwen's run)
-- A deep-context needle test at ≥48K depth would directly validate the YaRN
-  extension (the A–D prompts here are all short-prompt)
+
+## Suite A rerun at 6000 max tokens (2026-10-11 evening, fresh server per test)
+
+Results file: `bench_lfm_20261011_A6k.jsonl`. **All 5 finished with clean stops —
+zero truncation.** LFM's natural suite-A answers need 375–846 tokens; the
+historical 400-cap had been cutting 3 of 5 mid-answer.
+
+| Prompt | 400-cap | 6000-cap | Tokens used | gen tok/s |
+|---|---|---|---|---|
+| a_code | 400 ⏹ truncated | complete | 603 | 49.8 |
+| a_iambic | 78 clean | complete | 85 | 23.2 |
+| a_prose | 400 ⏹ truncated | complete | 846 | 33.6 |
+| a_creative | 318 clean | complete | 261 | 27.7 |
+| a_math | 400 ⏹ truncated | complete | 375 | 43.1 |
+| **Avg** | | **5/5 clean** | 2,170 total | **35.5** |
+
+## Deep needle test at ~48K depth (YaRN validation — the decisive 64K test)
+
+`needle_test.py`, needle "The secret access word for the vault is PINECONE-42."
+at the very start, filler after, question at the end. Fresh server per test.
+
+| Depth (actual prompt tokens) | Inside/beyond 32K training | Sampling | Answer | Grade |
+|---|---|---|---|---|
+| 30,640 | inside | temp 0.3 | **PINECONE-42** | PASS |
+| 49,340 | **17K beyond** | temp 0.3 | PINECONE | **FAIL** (suffix dropped) |
+| 49,340 | **17K beyond** | greedy (temp 0) | PINECONE | **FAIL** (deterministic) |
+
+Prompt processing at depth: **711–745 t/s** at 30.6K–49.3K tokens (69 s to chew
+a 49.3K-token prompt; ttft = pp time). Server steady at 4.84 GB RSS.
+
+**Finding:** exact recall at 49.3K depth degrades — the model retrieves the
+needle's semantic content (PINECONE) but drops the "-42" suffix, deterministically
+under greedy decoding. At 30.6K (inside native 32K) recall is exact. This is the
+YaRN extension's real cost on this model: **LFM2.5-VL-3B at 64K is usable for
+semantic long-context work, but exact-token recall (IDs, codes, verbatim
+strings) beyond ~32K cannot be trusted.** Gemma-4-E2B passed this same needle at
+48K under YaRN; LFM2.5-VL-3B does not.
+
+**Tokenizer note:** the filler that yields ~46.8K tokens on Qwen-class
+tokenizers only packs ~17 tokens/line on LFM's tokenizer (30.6K total at 1800
+reps). Always read actual depth from `usage.prompt_tokens` — never trust
+cross-model token estimates.
